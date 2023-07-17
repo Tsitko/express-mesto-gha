@@ -22,9 +22,9 @@ app.use((req, res, next) => {
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use('/users', require('./routes/users'));
-app.use('/cards', require('./routes/cards'));
-app.use('*', require('./routes/404'));
+app.use("/users", require("./routes/users"));
+app.use("/cards", require("./routes/cards"));
+app.use("*", require("./routes/404"));
 
 app.listen(PORT, () => {
   console.log(`App is running on port ${PORT}`);
