@@ -7,8 +7,6 @@ const {
   updateAvatar,
 } = require("../controllers/users");
 
-const regEx = require("../constants/constants");
-
 router.get("/users", getUsers);
 router.get("/:userId", getUser);
 router.post("/users", createUser);
