@@ -1,14 +1,14 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 const {
   ERROR_REQUEST,
   ERROR_NOT_FOUND,
-  ERROR_DEFAULT,
-} = require("../utils/errorCodes");
+  ERROR_DEFAULT
+} = require('../utils/errorCodes');
 
 module.exports.getCards = (_req, res) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch(() => res.status(ERROR_DEFAULT).send({ message: "error" }));
+    .catch(() => res.status(ERROR_DEFAULT).send({ message: 'error' }));
 };
 
 module.exports.createCard = (req, res) => {
@@ -18,12 +18,12 @@ module.exports.createCard = (req, res) => {
   Card.create({ name, link, owner })
     .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Unable to create card. Card data is incorrect",
+          message: 'Unable to create card. Card data is incorrect'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -36,17 +36,17 @@ module.exports.likeCard = (req, res) => {
     .orFail()
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "No cards found",
+          message: 'No cards found'
         });
       }
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Incorrect like data",
+          message: 'Incorrect like data'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -59,17 +59,17 @@ module.exports.dislikeCard = (req, res) => {
     .orFail()
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "Card not found",
+          message: 'Card not found'
         });
       }
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Incorrect dislike data",
+          message: 'Incorrect dislike data'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -78,16 +78,16 @@ module.exports.deleteCard = (req, res) => {
     .orFail()
     .then((card) => res.status(200).send(card))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "No cards found",
+          message: 'No cards found'
         });
       }
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res
           .status(ERROR_REQUEST)
-          .send({ message: "Unable to delete card. Card data incorrect" });
+          .send({ message: 'Unable to delete card. Card data incorrect' });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };

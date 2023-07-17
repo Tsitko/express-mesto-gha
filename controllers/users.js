@@ -1,14 +1,14 @@
-const User = require("../models/users");
+const User = require('../models/users');
 const {
   ERROR_REQUEST,
   ERROR_NOT_FOUND,
-  ERROR_DEFAULT,
-} = require("../utils/errorCodes");
+  ERROR_DEFAULT
+} = require('../utils/errorCodes');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERROR_DEFAULT).send({ message: "error" }));
+    .catch(() => res.status(ERROR_DEFAULT).send({ message: 'error' }));
 };
 
 module.exports.getUser = (req, res) => {
@@ -16,15 +16,15 @@ module.exports.getUser = (req, res) => {
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === "CastError") {
+      if (err.name === 'CastError') {
         return res
           .status(400)
-          .send({ message: "User id is in incorrect format" });
+          .send({ message: 'User id is in incorrect format' });
       }
-      if (err.name === "DocumentNotFoundError") {
-        return res.status(ERROR_NOT_FOUND).send({ message: "User not found" });
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -34,12 +34,12 @@ module.exports.createUser = (req, res) => {
   User.create({ name, about, avatar })
     .then((user) => res.status(201).send({ data: user }))
     .catch((err) => {
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Unable to create user. User data is incorrect",
+          message: 'Unable to create user. User data is incorrect'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -54,17 +54,17 @@ module.exports.updateUser = (req, res) => {
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "UserNotFound",
+          message: 'UserNotFound'
         });
       }
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Unable to update user. User data is incorrect",
+          message: 'Unable to update user. User data is incorrect'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
 
@@ -79,16 +79,16 @@ module.exports.updateAvatar = (req, res) => {
     .orFail()
     .then((user) => res.status(200).send(user))
     .catch((err) => {
-      if (err.name === "DocumentNotFoundError") {
+      if (err.name === 'DocumentNotFoundError') {
         return res.status(ERROR_NOT_FOUND).send({
-          message: "User Not found",
+          message: 'User Not found'
         });
       }
-      if (err.name === "ValidationError") {
+      if (err.name === 'ValidationError') {
         return res.status(ERROR_REQUEST).send({
-          message: "Unable to update avatar",
+          message: 'Unable to update avatar'
         });
       }
-      return res.status(ERROR_DEFAULT).send({ message: "error" });
+      return res.status(ERROR_DEFAULT).send({ message: 'error' });
     });
 };
