@@ -18,11 +18,5 @@
     "dev": "nodemon app.js",
     "start": "node app.js",
     "lint": "npx eslint ."
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ]
   }
 }
