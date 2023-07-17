@@ -1,55 +1,88 @@
-const Card = require("../models/card");
+const Card = require('../models/card');
 
-const getCards = (_, res, next) => {
+module.exports.getCards = (_req, res) => {
   Card.find({})
-    .then((cards) => {
-      res.status(200).send({ data: cards });
-    })
-    .catch(next);
+    .then((cards) => res.send({ data: cards }))
+    .catch(() => res.status(500).send({ message: 'error' }));
 };
 
-const createCard = (req, res, next) => {
+module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
+  const owner = req.user._id;
 
-  return Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
-      res.status(201).send({ data: card });
-    })
+  Card.create({ name, link, owner })
+    .then((card) => res.status(201).send({ data: card }))
     .catch((err) => {
-      return next(err);
-    });
-};
-
-const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
-    .then((card) => {
-      if (card.owner.equals(req.user._id)) {
-        return card.remove().then(() => res.send({ data: card }));
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({
+          message: 'Unable to create card. Card data is incorrect',
+        });
       }
-    })
-    .catch((err) => {
-      return next(err);
+      return res.status(500).send({ message: 'error' });
     });
 };
 
-const likeCard = (req, res) =>
+module.exports.likeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
-    { new: true }
-  );
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  )
+    .orFail()
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({
+          message: 'No cards found',
+        });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({
+          message: 'Incorrect like data',
+        });
+      }
+      return res.status(500).send({ message: 'error' });
+    });
+};
 
-const dislikeCard = (req, res) =>
+module.exports.dislikeCard = (req, res) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
-    { new: true }
-  );
+    { new: true },
+  )
+    .orFail()
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({
+          message: 'Card not found',
+        });
+      }
+      if (err.name === 'CastError') {
+        return res.status(400).send({
+          message: 'Incorrect dislike data',
+        });
+      }
+      return res.status(500).send({ message: 'error' });
+    });
+};
 
-module.exports = {
-  getCards,
-  createCard,
-  deleteCard,
-  likeCard,
-  dislikeCard,
+module.exports.deleteCard = (req, res) => {
+  Card.findByIdAndRemove(req.params.cardId)
+    .orFail()
+    .then((card) => res.status(200).send(card))
+    .catch((err) => {
+      if (err.name === 'DocumentNotFoundError') {
+        return res.status(404).send({
+          message: 'No cards found',
+        });
+      }
+      if (err.name === 'CastError') {
+        res
+          .status(400)
+          .send({ message: 'Unable to delete card. Card data incorrect' });
+      }
+      return res.status(500).send({ message: 'error' });
+    });
 };

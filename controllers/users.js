@@ -70,13 +70,3 @@ module.exports.updaAvatar = (req, res) => {
       return res.status(500).send({ message: 'error' });
     });
 };
-
-
-
-module.exports = {
-  getUsers,
-  getUser,
-  createUser,
-  updateUser,
-  updateAvatar,
-};
