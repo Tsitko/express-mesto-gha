@@ -147,8 +147,8 @@ const updateAvatar = (req, res, next) => {
 
 const getUsers = (_, res, next) => {
   User.find({})
-    .then(() => {
-      res.status(401).send({ message: 'forbidden' });
+    .then((users) => {
+      res.status(200).send({ data: users });
     })
     .catch(next);
 };
