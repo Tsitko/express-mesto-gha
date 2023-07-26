@@ -4,7 +4,7 @@ const {
   getUsers, getUser, updateUser, updateAvatar, getCurrentUser,
 } = require('../controllers/users');
 
-const regEx = require('../constants/constants');
+const regEx = require('../utils/constants');
 
 router.get('/', getUsers);
 router.get('/me', getCurrentUser);
