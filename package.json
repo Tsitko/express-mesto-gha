@@ -9,6 +9,7 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.0",
     "mongoose": "^7.3.2",
+    "mongoose-type-url": "^2.1.0",
     "validator": "^13.9.0"
   },
   "devDependencies": {

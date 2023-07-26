@@ -2,96 +2,91 @@ const Card = require('../models/card');
 const BadRequestError = require('../middlewares/errors/BadRequestError');
 const NotFoundError = require('../middlewares/errors/NotFoundError');
 const ForbiddenError = require('../middlewares/errors/ForbiddenError');
+const { CREATE_CODE } = require('../utils/constants');
 
-const getCards = (_, res, next) => {
+const createCard = (req, res, next) => {
+  const { _id } = req.user;
+  const { name, link } = req.body;
+  Card.create({ name, link, owner: _id })
+    .then((card) => {
+      res.status(CREATE_CODE).send(card);
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        next(new BadRequestError('Переданы некорректные данные'));
+      } else {
+        next(err);
+      }
+    });
+};
+
+const getAllCards = (req, res, next) => {
   Card.find({})
+    .populate('owner')
+    .populate('likes')
     .then((cards) => {
-      res.status(200).send({ data: cards });
+      res.send(cards);
     })
     .catch(next);
 };
 
-const createCard = (req, res, next) => {
-  const { name, link } = req.body;
-
-  return Card.create({ name, link, owner: req.user._id })
-    .then((card) => {
-      res.status(201).send({ data: card });
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        const errorMessage = Object.values(err.errors).map((error) => error.message).join(', ');
-        return next(
-          new BadRequestError(`Validation error: ${errorMessage}`),
-        );
-      }
-      return next(err);
-    });
-};
-
 const deleteCard = (req, res, next) => {
-  Card.findById(req.params.cardId)
+  Card.findById({ _id: req.params.cardId })
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('По данному _id информация не найдена');
       }
-      if (!card.owner.equals(req.user._id)) {
-        throw new ForbiddenError('You are not allowed to remove posts of other users');
+      if (card.owner.toString() !== (req.user._id)) {
+        throw new ForbiddenError('Доступ закрыт');
       }
-      return card.remove().then(() => res.send({ data: card }));
+      card.deleteOne()
+        .then((deletedCard) => res.send(deletedCard))
+        .catch(next);
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
-const likeCard = (req, res, next) => {
+const addLikeCard = (req, res, next) => {
+  const { _id } = req.user;
   Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $addToSet: { likes: req.user._id } },
+    { _id: req.params.cardId },
+    { $addToSet: { likes: _id } },
     { new: true },
   )
+    .populate('owner')
+    .populate('likes')
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('По данному _id информация не найдена');
       }
-      return res.status(200).send({ data: card });
+      res.send(card);
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
-const dislikeCard = (req, res, next) => {
+const removeLikeCard = (req, res, next) => {
+  const { _id } = req.user;
+
   Card.findByIdAndUpdate(
-    req.params.cardId,
-    { $pull: { likes: req.user._id } },
+    { _id: req.params.cardId },
+    { $pull: { likes: _id } },
     { new: true },
   )
+    .populate('owner')
+    .populate('likes')
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('По данному _id информация не найдена');
       }
-      return res.status(200).send({ data: card });
+      res.send(card);
     })
-    .catch((err) => {
-      if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
-      }
-      return next(err);
-    });
+    .catch(next);
 };
 
 module.exports = {
-  getCards,
   createCard,
+  getAllCards,
   deleteCard,
-  likeCard,
-  dislikeCard,
+  addLikeCard,
+  removeLikeCard,
 };
