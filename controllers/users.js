@@ -7,7 +7,6 @@ const {
   ERROR_DEFAULT,
 } = require('../utils/errorCodes');
 
-
 const { JWT_SECRET = 'dev-key' } = process.env;
 
 module.exports.login = (req, res, next) => {
@@ -15,10 +14,16 @@ module.exports.login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
+        expiresIn: '1d',
+      });
       res.send({ token });
     })
-    .catch(() => res.status(ERROR_DEFAULT).send({ message:'Incorrect email or password'}));
+    .catch(() =>
+      res
+        .status(ERROR_DEFAULT)
+        .send({ message: 'Incorrect email or password' }),
+    );
 };
 module.exports.getUsers = (req, res) => {
   User.find({})
