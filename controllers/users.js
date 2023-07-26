@@ -13,23 +13,23 @@ const login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '7d' });
       res.send({ token });
     })
-    .catch(() => next(new UnauthorizedError('Incorrect email or password')));
+    .catch(() => next(new UnauthorizedError('Неправильная почта или пароль')));
 };
 
 const getUser = (req, res, next) => {
   User.findById(req.params.id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('User not found');
+        throw new NotFoundError('А в цеху его нет');
       }
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
@@ -39,7 +39,7 @@ const getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('User not found');
+        throw new NotFoundError('А в цеху его нет');
       }
       return res.status(200).send({ data: user });
     })
@@ -70,7 +70,7 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return next(new ConflictError('This email is already taken'));
+        return next(new ConflictError('На этот мейл уже кто-то зарегался'));
       }
       if (err.name === 'ValidationError') {
         const errorMessage = Object.values(err.errors)
@@ -97,18 +97,18 @@ const updateUser = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('The user is not found');
+        throw new NotFoundError('А в цеху его нет');
       }
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(
-          new BadRequestError('The information you provided is not correct'),
+          new BadRequestError('Некорректный формат данных пользователя'),
         );
       }
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
@@ -128,18 +128,18 @@ const updateAvatar = (req, res, next) => {
   )
     .then((user) => {
       if (!user) {
-        throw new NotFoundError('The user is not found');
+        throw new NotFoundError('А в цеху его нет');
       }
       return res.status(200).send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return next(
-          new BadRequestError('The information you provided is not correct'),
+          new BadRequestError('Некорректный формат данных пользователя'),
         );
       }
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
