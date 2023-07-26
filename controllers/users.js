@@ -20,8 +20,7 @@ const login = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  res.send(req.params.userId);
-  User.findById(req.params.userId)
+  User.findById(req.params.id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('User not found');

@@ -14,7 +14,7 @@ router.patch('/me', celebrate({
     about: Joi.string().min(2).max(30),
   }),
 }), updateUser);
-router.get('/:userId', celebrate({
+router.get('/:id', celebrate({
   params: Joi.object().keys({
     id: Joi.string().length(24).hex().required(),
   }),
