@@ -42,7 +42,7 @@ const getCurrentUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('User not found');
       }
-      return res.status(200).sent({ data: user });
+      return res.status(200).send({ data: user });
     })
     .catch((err) => next(err));
 };
