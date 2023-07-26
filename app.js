@@ -42,12 +42,12 @@ app.use(auth);
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
-app.use('*', (_, __, next) => next(new NotFoundError("This page doesn't exist")));
+app.use('*', (_, __, next) => next(new NotFoundError('Нет такой страницы')));
 
 app.use(errors());
 
 app.use((err, _, res, next) => {
-  const { statusCode = 500, message = 'Server error' } = err;
+  const { statusCode = 500, message = 'Ошибка на сервере' } = err;
   res.status(statusCode).send({ message });
   next();
 });
