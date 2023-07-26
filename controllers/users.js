@@ -20,6 +20,7 @@ const login = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
+  res.send(req.params.userId);
   User.findById(req.params.userId)
     .then((user) => {
       if (!user) {

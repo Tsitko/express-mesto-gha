@@ -7,11 +7,6 @@ const {
 const regEx = require('../constants/constants');
 
 router.get('/', getUsers);
-router.get('/:userId', celebrate({
-  params: Joi.object().keys({
-    id: Joi.string().length(24).hex().required(),
-  }),
-}), getUser);
 router.get('/me', getCurrentUser);
 router.patch('/me', celebrate({
   body: Joi.object().keys({
@@ -19,6 +14,11 @@ router.patch('/me', celebrate({
     about: Joi.string().min(2).max(30),
   }),
 }), updateUser);
+router.get('/:userId', celebrate({
+  params: Joi.object().keys({
+    id: Joi.string().length(24).hex().required(),
+  }),
+}), getUser);
 router.patch('/me/avatar', celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().pattern(regEx),
