@@ -33,16 +33,16 @@ const deleteCard = (req, res, next) => {
   Card.findById(req.params.cardId)
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('Нет такой карточки');
       }
       if (!card.owner.equals(req.user._id)) {
-        throw new ForbiddenError('You are not allowed to remove posts of other users');
+        throw new ForbiddenError('Нельзя удалить то, что не добавлял');
       }
       return card.deleteOne().then(() => res.send({ data: card }));
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
@@ -56,13 +56,13 @@ const likeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('Нет такой карточки');
       }
       return res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
@@ -76,13 +76,13 @@ const dislikeCard = (req, res, next) => {
   )
     .then((card) => {
       if (!card) {
-        throw new NotFoundError('The post is not found');
+        throw new NotFoundError('Нет такой карточки');
       }
       return res.status(200).send({ data: card });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
-        return next(new BadRequestError('Id is not correct'));
+        return next(new BadRequestError('Некорректный формат id'));
       }
       return next(err);
     });
