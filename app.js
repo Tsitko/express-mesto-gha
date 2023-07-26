@@ -6,6 +6,7 @@ const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const regEx = require('./constants/constants');
 
+const { PORT = 3000 } = process.env;
 mongoose.connect('mongodb://localhost:27017/mestodb');
 
 const app = express();
@@ -51,4 +52,6 @@ app.use((err, _, res, next) => {
   next();
 });
 
-module.exports = app;
+app.listen(PORT, () => {
+  console.log(`start server at port ${PORT}`);
+});
