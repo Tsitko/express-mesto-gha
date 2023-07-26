@@ -51,6 +51,4 @@ app.use((err, _, res, next) => {
   res.status(statusCode).send({ message });
   next();
 });
-app.listen(PORT, () => {
-  console.log(`App is running on port ${PORT}`);
-});
+app.listen(PORT);

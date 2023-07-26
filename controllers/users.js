@@ -13,16 +13,14 @@ const login = (req, res, next) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '7d',
-      });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
       res.send({ token });
     })
     .catch(() => next(new UnauthorizedError('Incorrect email or password')));
 };
 
 const getUser = (req, res, next) => {
-  User.findById(req.params.id)
+  User.findById(req.params.userId)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('User not found');
@@ -53,14 +51,16 @@ const createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  return bcrypt.hash(password, 10)
+  return bcrypt
+    .hash(password, 10)
     .then((hash) => User.create({
       name,
       about,
       avatar,
       email,
       password: hash,
-    })).then((user) => {
+    }))
+    .then((user) => {
       res.status(201).send({
         name: user.name,
         about: user.about,
@@ -147,7 +147,9 @@ const updateAvatar = (req, res, next) => {
 
 const getUsers = (_, res, next) => {
   User.find({})
-    .then((users) => res.send({ data: users }))
+    .then((users) => {
+      res.status(200).send({ data: users });
+    })
     .catch(next);
 };
 
