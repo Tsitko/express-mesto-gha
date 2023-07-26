@@ -1,6 +1,6 @@
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const User = require('../models/users');
 const BadRequestError = require('../middlewares/errors/BadRequestError');
 const NotFoundError = require('../middlewares/errors/NotFoundError');
 const UnauthorizedError = require('../middlewares/errors/UnauthorizedError');
@@ -49,10 +49,11 @@ const getCurrentUser = (req, res, next) => {
 };
 
 const createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+  const {
+          name, about, avatar, email, password
+        } = req.body;
 
-  return bcrypt
-    .hash(password, 10)
+  return bcrypt.hash(password, 10)
     .then((hash) =>
       User.create({
         name,
@@ -61,8 +62,7 @@ const createUser = (req, res, next) => {
         email,
         password: hash,
       }),
-    )
-    .then((user) => {
+    ).then((user) => {
       res.status(201).send({
         name: user.name,
         about: user.about,

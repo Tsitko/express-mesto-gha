@@ -1,7 +1,7 @@
 const express = require('express');
-const { login, createUser } = require('./controllers/users');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { login, createUser } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
