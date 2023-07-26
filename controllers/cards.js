@@ -38,7 +38,7 @@ const deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new ForbiddenError('You are not allowed to remove posts of other users');
       }
-      return card.remove().then(() => res.send({ data: card }));
+      return card.deleteOne().then(() => res.send({ data: card }));
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
