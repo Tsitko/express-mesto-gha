@@ -14,7 +14,7 @@ const login = (req, res, next) => {
   return User.findUserByCredentials(email, password)
     .then((user) => {
       const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '1d',
+        expiresIn: '7d',
       });
       res.send({ token });
     })
@@ -22,7 +22,7 @@ const login = (req, res, next) => {
 };
 
 const getUser = (req, res, next) => {
-  User.findById(req.params.userId)
+  User.findById(req.params.id)
     .then((user) => {
       if (!user) {
         throw new NotFoundError('User not found');
@@ -147,9 +147,7 @@ const updateAvatar = (req, res, next) => {
 
 const getUsers = (_, res, next) => {
   User.find({})
-    .then((users) => {
-      res.status(200).send({ data: users });
-    })
+    .then((users) => res.send({ data: users }))
     .catch(next);
 };
 
