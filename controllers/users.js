@@ -9,7 +9,7 @@ const {
 
 const { JWT_SECRET = 'dev-key' } = process.env;
 
-module.exports.login = (req, res, next) => {
+module.exports.login = (req, res) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -19,9 +19,7 @@ module.exports.login = (req, res, next) => {
       });
       res.send({ token });
     })
-    .catch(() =>
-      res
-        .status(ERROR_DEFAULT)
+    .catch(() => res.status(ERROR_DEFAULT)
         .send({ message: 'Incorrect email or password' }),
     );
 };
@@ -48,18 +46,39 @@ module.exports.getUser = (req, res) => {
     });
 };
 
-module.exports.createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
+module.exports.createUser = (req, res, next) => {
+  const { name, about, avatar, email, password } = req.body;
 
-  User.create({ name, about, avatar })
-    .then((user) => res.status(201).send({ data: user }))
+  return bcrypt
+    .hash(password, 10)
+    .then((hash) =>
+      User.create({
+        name,
+        about,
+        avatar,
+        email,
+        password: hash,
+      }),
+    )
+    .then((user) => {
+      res.status(201).send({
+        name: user.name,
+        about: user.about,
+        avatar: user.avatar,
+        email: user.email,
+      });
+    })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return res.status(ERROR_REQUEST).send({
-          message: 'Unable to create user. User data is incorrect',
-        });
+      if (err.code === 11000) {
+        return res.status(ERROR_DEFAULT).send({ message: 'error' });
       }
-      return res.status(ERROR_DEFAULT).send({ message: 'error' });
+      if (err.name === 'ValidationError') {
+        const errorMessage = Object.values(err.errors)
+          .map((error) => error.message)
+          .join(', ');
+        return res.status(ERROR_DEFAULT).send({ message: 'Validation error' });
+      }
+      return next(err);
     });
 };
 
