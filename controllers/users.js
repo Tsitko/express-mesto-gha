@@ -1,65 +1,65 @@
-const User = require('../models/users');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const {
-  ERROR_REQUEST,
-  ERROR_NOT_FOUND,
-  ERROR_DEFAULT,
-} = require('../utils/errorCodes');
+const User = require('../models/user');
+const BadRequestError = require('../middlewares/errors/BadRequestError');
+const NotFoundError = require('../middlewares/errors/NotFoundError');
+const UnauthorizedError = require('../middlewares/errors/UnauthorizedError');
+const ConflictError = require('../middlewares/errors/ConflictError');
 
 const { JWT_SECRET = 'dev-key' } = process.env;
 
-module.exports.login = (req, res) => {
+const login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, JWT_SECRET, {
-        expiresIn: '1d',
-      });
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
       res.send({ token });
     })
-    .catch(() => res.status(ERROR_DEFAULT)
-        .send({ message: 'Incorrect email or password' }),
-    );
-};
-module.exports.getUsers = (req, res) => {
-  User.find({})
-    .then((users) => res.send({ data: users }))
-    .catch(() => res.status(ERROR_DEFAULT).send({ message: 'error' }));
+    .catch(() => next(new UnauthorizedError('Incorrect email or password')));
 };
 
-module.exports.getUser = (req, res) => {
+const getUser = (req, res, next) => {
   User.findById(req.params.userId)
-    .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        return res
-          .status(400)
-          .send({ message: 'User id is in incorrect format' });
+      if (err.kind === 'ObjectId') {
+        return next(new BadRequestError('Id is not correct'));
       }
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({ message: 'User not found' });
-      }
-      return res.status(ERROR_DEFAULT).send({ message: 'error' });
+      return next(err);
     });
 };
 
-module.exports.createUser = (req, res, next) => {
-  const { name, about, avatar, email, password } = req.body;
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('User not found');
+      }
+      return res.status(200).sent({ data: user });
+    })
+    .catch((err) => next(err));
+};
+
+const createUser = (req, res, next) => {
+  const {
+    name, about, avatar, email, password,
+  } = req.body;
 
   return bcrypt
     .hash(password, 10)
-    .then((hash) =>
-      User.create({
-        name,
-        about,
-        avatar,
-        email,
-        password: hash,
-      }),
-    )
+    .then((hash) => User.create({
+      name,
+      about,
+      avatar,
+      email,
+      password: hash,
+    }))
     .then((user) => {
       res.status(201).send({
         name: user.name,
@@ -70,64 +70,95 @@ module.exports.createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return res.status(ERROR_DEFAULT).send({ message: 'error' });
+        return next(new ConflictError('This email is already taken'));
       }
       if (err.name === 'ValidationError') {
         const errorMessage = Object.values(err.errors)
           .map((error) => error.message)
           .join(', ');
-        return res.status(ERROR_DEFAULT).send({ message: 'Validation error' });
+        return next(new BadRequestError(`Validation error: ${errorMessage}`));
       }
       return next(err);
     });
 };
 
-module.exports.updateUser = (req, res) => {
+const updateUser = (req, res, next) => {
   const { name, about } = req.body;
-
-  User.findByIdAndUpdate(
+  return User.findByIdAndUpdate(
     req.user._id,
-    { name, about },
-    { new: true, runValidators: true },
+    {
+      name,
+      about,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
-    .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('The user is not found');
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'UserNotFound',
-        });
-      }
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_REQUEST).send({
-          message: 'Unable to update user. User data is incorrect',
-        });
+        return next(
+          new BadRequestError('The information you provided is not correct'),
+        );
       }
-      return res.status(ERROR_DEFAULT).send({ message: 'error' });
+      if (err.kind === 'ObjectId') {
+        return next(new BadRequestError('Id is not correct'));
+      }
+      return next(err);
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+const updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
-
   User.findByIdAndUpdate(
     req.user._id,
-    { avatar },
-    { new: true, runValidators: true },
+    {
+      avatar,
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
   )
-    .orFail()
-    .then((user) => res.status(200).send(user))
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('The user is not found');
+      }
+      return res.status(200).send({ data: user });
+    })
     .catch((err) => {
-      if (err.name === 'DocumentNotFoundError') {
-        return res.status(ERROR_NOT_FOUND).send({
-          message: 'User Not found',
-        });
-      }
       if (err.name === 'ValidationError') {
-        return res.status(ERROR_REQUEST).send({
-          message: 'Unable to update avatar',
-        });
+        return next(
+          new BadRequestError('The information you provided is not correct'),
+        );
       }
-      return res.status(ERROR_DEFAULT).send({ message: 'error' });
+      if (err.kind === 'ObjectId') {
+        return next(new BadRequestError('Id is not correct'));
+      }
+      return next(err);
     });
+};
+
+const getUsers = (_, res, next) => {
+  User.find({})
+    .then((users) => {
+      res.status(200).send({ data: users });
+    })
+    .catch(next);
+};
+
+module.exports = {
+  getUsers,
+  getUser,
+  createUser,
+  updateUser,
+  updateAvatar,
+  login,
+  getCurrentUser,
 };
