@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors, celebrate, Joi } = require('celebrate');
-const NotFoundError = require('./errors/NotFoundError');
+const NotFoundError = require('./middlewares/errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const regEx = require('./constants/constants');
