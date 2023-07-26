@@ -1,10 +1,25 @@
 const User = require('../models/users');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const {
   ERROR_REQUEST,
   ERROR_NOT_FOUND,
   ERROR_DEFAULT,
 } = require('../utils/errorCodes');
 
+
+const { JWT_SECRET = 'dev-key' } = process.env;
+
+module.exports.login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  return User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign({ _id: user._id }, JWT_SECRET, { expiresIn: '1d' });
+      res.send({ token });
+    })
+    .catch(() => res.status(ERROR_DEFAULT).send({ message:'Incorrect email or password'}));
+};
 module.exports.getUsers = (req, res) => {
   User.find({})
     .then((users) => res.send({ data: users }))

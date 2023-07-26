@@ -1,4 +1,5 @@
 const express = require('express');
+const { login, createUser } = require('./controllers/users');
 
 const bodyParser = require('body-parser');
 
@@ -12,19 +13,13 @@ mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
 
 app.use(express.json());
 
-app.use((req, res, next) => {
-  req.user = {
-    _id: '56e6835a91ffdc6114c728c4',
-  };
-
-  next();
-});
-
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 app.use('*', require('./routes/404'));
+app.post('/signin', login);
+app.post('/signup', createUser);
 
 app.listen(PORT, () => {
   console.log(`App is running on port ${PORT}`);
