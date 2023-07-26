@@ -4,7 +4,7 @@ const {
   getCards, createCard, deleteCard, likeCard, dislikeCard,
 } = require('../controllers/cards');
 
-const regEx = require('../utils/constants');
+const regEx = require('../constants/constants');
 
 router.get('/', getCards);
 

@@ -1,23 +1,54 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const bodyParser = require('body-parser');
-const { errors } = require('celebrate');
-const router = require('./routes');
-const selectErrors = require('./middlewares/errors');
+const { errors, celebrate, Joi } = require('celebrate');
+const NotFoundError = require('./errors/NotFoundError');
+const { login, createUser } = require('./controllers/users');
+const auth = require('./middlewares/auth');
+const regEx = require('./constants/constants');
 
-const { PORT = 3000 } = process.env;
+mongoose.connect('mongodb://localhost:27017/mestodb');
+
 const app = express();
 
-mongoose.connect('mongodb://127.0.0.1:27017/mestodb');
-
 app.use(express.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
-app.use(router);
+app.post(
+  '/signin',
+  celebrate({
+    body: Joi.object().keys({
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  login,
+);
+
+app.post(
+  '/signup',
+  celebrate({
+    body: Joi.object().keys({
+      name: Joi.string().min(2).max(30),
+      about: Joi.string().min(2).max(30),
+      avatar: Joi.string().pattern(regEx),
+      email: Joi.string().required().email(),
+      password: Joi.string().required(),
+    }),
+  }),
+  createUser,
+);
+
+app.use(auth);
+app.use('/users', require('./routes/users'));
+app.use('/cards', require('./routes/cards'));
+
+app.use('*', (_, __, next) => next(new NotFoundError("This page doesn't exist")));
 
 app.use(errors());
-app.use(selectErrors);
 
-app.listen(PORT, () => {
-  console.log(`start server at port ${PORT}`);
+app.use((err, _, res, next) => {
+  const { statusCode = 500, message = 'Server error' } = err;
+  res.status(statusCode).send({ message });
+  next();
 });
+
+module.exports = app;
