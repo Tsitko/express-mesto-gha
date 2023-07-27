@@ -6,7 +6,7 @@ const ForbiddenError = require('../middlewares/errors/ForbiddenError');
 const getCards = (_, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.status(200).send({ data: cards });
+      res.send({ data: cards });
     })
     .catch(next);
 };
