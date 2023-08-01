@@ -8,17 +8,20 @@
     "express": "^4.18.2",
     "jsonwebtoken": "^8.5.0",
     "mongoose": "^7.3.2",
+    "ssh-keygen": "^0.5.0",
     "validator": "^13.9.0"
   },
   "devDependencies": {
     "eslint": "^8.44.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.27.5",
+    "jest": "^29.6.2",
     "nodemon": "^2.0.22"
   },
   "scripts": {
     "dev": "nodemon app.js",
     "start": "node app.js",
-    "lint": "npx eslint ."
+    "lint": "npx eslint .",
+    "test": "jest"
   }
 }
