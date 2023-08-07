@@ -1,7 +1,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
-require('dotenv').config();
 const cors = require('cors');
+require('dotenv').config();
 const { errors, celebrate, Joi } = require('celebrate');
 const NotFoundError = require('./middlewares/errors/NotFoundError');
 const { login, createUser } = require('./controllers/users');
