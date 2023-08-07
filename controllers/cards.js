@@ -6,7 +6,7 @@ const ForbiddenError = require('../middlewares/errors/ForbiddenError');
 const getCards = (_, res, next) => {
   Card.find({})
     .then((cards) => {
-      res.send({ data: cards });
+      res.send(cards);
     })
     .catch(next);
 };
@@ -16,7 +16,7 @@ const createCard = (req, res, next) => {
 
   return Card.create({ name, link, owner: req.user._id })
     .then((card) => {
-      res.status(201).send({ card });
+      res.status(201).send(card);
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -38,7 +38,7 @@ const deleteCard = (req, res, next) => {
       if (!card.owner.equals(req.user._id)) {
         throw new ForbiddenError('Нельзя удалить то, что не добавлял');
       }
-      return card.deleteOne().then(() => res.send({ data: card }));
+      return card.deleteOne().then(() => res.send(card));
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
@@ -58,7 +58,7 @@ const likeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Нет такой карточки');
       }
-      return res.status(200).send({ card });
+      return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
@@ -78,7 +78,7 @@ const dislikeCard = (req, res, next) => {
       if (!card) {
         throw new NotFoundError('Нет такой карточки');
       }
-      return res.status(200).send({ card });
+      return res.status(200).send(card);
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
