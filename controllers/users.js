@@ -24,7 +24,7 @@ const getUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('А в цеху его нет');
       }
-      return res.send({ data: user });
+      return res.send({ user });
     })
     .catch((err) => {
       if (err.kind === 'ObjectId') {
@@ -40,7 +40,7 @@ const getCurrentUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('А в цеху его нет');
       }
-      return res.status(200).send({ data: user });
+      return res.status(200).send({ user });
     })
     .catch((err) => next(err));
 };
@@ -98,7 +98,7 @@ const updateUser = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('А в цеху его нет');
       }
-      return res.status(200).send({ data: user });
+      return res.status(200).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -129,7 +129,7 @@ const updateAvatar = (req, res, next) => {
       if (!user) {
         throw new NotFoundError('А в цеху его нет');
       }
-      return res.status(200).send({ data: user });
+      return res.status(200).send({ user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
@@ -147,7 +147,7 @@ const updateAvatar = (req, res, next) => {
 const getUsers = (_, res, next) => {
   User.find({})
     .then((users) => {
-      res.status(200).send({ data: users });
+      res.status(200).send({ users });
     })
     .catch(next);
 };
